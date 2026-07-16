@@ -11,9 +11,7 @@ from streamlit_drawable_canvas import st_canvas
 from datasets import load_dataset
 from tensorflow.keras.layers import Layer, Dense, Embedding, LayerNormalization, MultiHeadAttention, Flatten
 
-# ==========================================
 # PAGE CONFIGURATION
-# ==========================================
 st.set_page_config(
     page_title="ViT Handwriting Recognition",
     page_icon="✍️",
@@ -32,9 +30,8 @@ st.markdown("""
 st.markdown('<div class="main-title">✍️ Vision Transformer Character Recognition</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">A custom ViT model trained on the IAM dataset to recognize handwritten text</div>', unsafe_allow_html=True)
 
-# ==========================================
-# 1. VIT MODEL CLASS DEFINITION (Must match your training structure)
-# ==========================================
+
+# VIT MODEL CLASS DEFINITION (Must match your training structure)
 class Patch_Encoder(Layer):
     def __init__(self, num_patches, hidden_size, patch_size=16, **kwargs):
         super(Patch_Encoder, self).__init__(name='patch_encoder', **kwargs)
@@ -96,9 +93,8 @@ class VIT(tf.keras.Model):
         x = self.dense_2(x)
         return self.dense_3(x)
 
-# ==========================================
-# 2. DATA LOADING & MODEL CACHING
-# ==========================================
+
+# DATA LOADING & MODEL CACHING
 @st.cache_resource
 def load_vocabulary():
     """Extracts vocabulary and class settings dynamically to align labels."""
@@ -144,9 +140,8 @@ VIT_LABELS = load_vocabulary()
 num_classes_total = len(VIT_LABELS)
 model = load_vit_model(num_classes=num_classes_total)
 
-# ==========================================
-# 3. USER INPUT INTERFACE
-# ==========================================
+
+# USER INPUT INTERFACE
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
@@ -183,9 +178,8 @@ with col1:
             st.image(img, caption="Original Uploaded Image", width=256)
             final_image = img
 
-# ==========================================
-# 4. INFERENCE PIPELINE
-# ==========================================
+
+# INFERENCE PIPELINE
 with col2:
     st.subheader("📊 Model Prediction")
     

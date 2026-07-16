@@ -10,9 +10,8 @@ from tensorflow.keras import layers, Model
 from tensorflow.keras.layers import Layer, Dense, Embedding, LayerNormalization, MultiHeadAttention, Flatten
 from datasets import load_dataset
 
-# ==========================================
-# 1. CONFIGURATION & HYPERPARAMETERS
-# ==========================================
+
+#CONFIGURATION & HYPERPARAMETERS
 CONFIGURATION = {
     "PATCH_SIZE": 16,
     "NUM_CLASSES": 80, 
@@ -24,9 +23,8 @@ CHANNELS = 3
 BATCH_SIZE = 16  
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-# ==========================================
-# 2. LOAD DATASET
-# ==========================================
+
+# LOAD DATASET
 print("Loading Teklia/IAM-line dataset...")
 hf_dataset = load_dataset("Teklia/IAM-line")
 
@@ -42,9 +40,8 @@ def tokenize_label(text):
         return 0
     return char_to_num.get(text[0], 0)
 
-# ==========================================
-# 3. MEMORY-EFFICIENT GENERATORS
-# ==========================================
+
+# MEMORY-EFFICIENT GENERATORS
 def train_gen():
     for item in hf_dataset['train']:
         img_np = np.array(item['image'].convert('RGB'))
@@ -57,9 +54,8 @@ def test_gen():
         label = tokenize_label(item['text'])
         yield img_np, label
 
-# ==========================================
-# 4. PREPROCESSING & AUGMENTATION PIPELINES
-# ==========================================
+
+# PREPROCESSING & AUGMENTATION PIPELINES
 @tf.function
 def prepare_image(image, label):
     image = tf.image.resize(image, [TARGET_HEIGHT, TARGET_WIDTH])
@@ -106,9 +102,9 @@ ds_test = ds_test.map(prepare_image, num_parallel_calls=AUTOTUNE)
 ds_test = ds_test.batch(BATCH_SIZE)
 ds_test = ds_test.prefetch(AUTOTUNE)
 
-# ==========================================
-# 5. CUSTOM VISION TRANSFORMER (ViT) MODEL
-# ==========================================
+
+# CUSTOM VISION TRANSFORMER (ViT) MODEL
+
 class Patch_Encoder(Layer):
     def __init__(self, num_patches, hidden_size, **kwargs):
         super(Patch_Encoder, self).__init__(name='patch_encoder', **kwargs)
@@ -176,9 +172,9 @@ class VIT(Model):
         x = self.dense_2(x)
         return self.dense_3(x)
 
-# ==========================================
-# 6. INITIALIZE & BUILD MODEL CONFIGURATION
-# ==========================================
+
+# INITIALIZE & BUILD MODEL CONFIGURATION
+
 print("Building ViT model...")
 vit = VIT(num_heads=8, hidden_size=768, num_patches=256, num_layers=4, num_dense_units=1024)
 
@@ -195,9 +191,8 @@ _ = vit(dummy_input)
 # Display a populated model summary
 vit.summary()
 
-# ==========================================
-# 7. CALLBACKS CONFIGURATION
-# ==========================================
+
+# CALLBACKS CONFIGURATION
 early_stopping = keras.callbacks.EarlyStopping(
     monitor='val_loss',
     patience=3,
@@ -215,9 +210,8 @@ checkpoint_callback = keras.callbacks.ModelCheckpoint(
 
 callbacks_list = [early_stopping, checkpoint_callback]
 
-# ==========================================
-# 8. TRAIN & EVALUATE
-# ==========================================
+
+# TRAIN & EVALUATE
 print("\nStarting model training...")
 vit.fit(
     ds_train,
